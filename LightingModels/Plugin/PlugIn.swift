@@ -187,19 +187,13 @@ class LightingBasePlugIn: NSObject, FxTileableEffect {
                                includeFilters: true,
                                parameterID: 0)!
         ]
-        // Only schedule the image well request when an image is actually connected.
-        // We read hasAuxTexture from the pluginState that was produced by pluginState(_:atTime:quality:),
-        // which uses FxParameterRetrievalAPI_v7 to detect whether the well is populated.
-        var hasAux = false
-        if let data = pluginState,
-           data.count >= MemoryLayout<LightingPluginState>.size {
-            let state = data.withUnsafeBytes {
-                $0.bindMemory(to: LightingPluginState.self).baseAddress!.pointee
-            }
-            hasAux = state.hasAuxTexture == 1
-        }
-        if hasAux,
-           let wellID = imageWellParamID,
+        // Always declare the image well as a potential input source (when this shader has one)
+        // so that Motion knows it is a valid drop target, regardless of whether it is currently
+        // populated.  FxImageTileRequest(_:) returns nil when the well is empty, so no actual
+        // image data is requested in that case — Motion simply sees the slot as schedulable and
+        // enables the drop UI.  The hasAuxTexture guard in renderDestinationImage already handles
+        // the case where sourceImages[1] is absent at render time.
+        if let wellID = imageWellParamID,
            let req = FxImageTileRequest(source: kFxImageTileRequestSourceParameter,
                                         time: renderTime,
                                         includeFilters: false,
