@@ -19,7 +19,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
 	<key>PlugInKit</key>
 	<dict>
 		<key>Attributes</key>
@@ -55,19 +55,199 @@
 	<array>
 		<dict>
 			<key>className</key>
-			<string>LightingModelsPlugIn</string>
+			<string>BlinnPlugIn</string>
 			<key>displayName</key>
-			<string>Lighting Models</string>
+			<string>Blinn</string>
 			<key>group</key>
 			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
 			<key>infoString</key>
-			<string>11 classic lighting models ported to Metal: Blinn, Phong, Gooch, EdgeFuzz, GlossyWet, Hemisphere, LambSkin, LUTSkin, ThinFilm, EnvMap, Velvet</string>
+			<string>Blinn-Phong specular lighting model</string>
 			<key>protocolNames</key>
 			<array>
 				<string>FxFilter</string>
 			</array>
 			<key>uuid</key>
-			<string>B2C3D4E5-F6A7-8901-BCDE-F12345678901</string>
+			<string>C1000001-0000-0000-0000-000000000001</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>PhongPlugIn</string>
+			<key>displayName</key>
+			<string>Phong Point Light</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>Classic Phong point-light shading model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-000000000002</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>GoochPlugIn</string>
+			<key>displayName</key>
+			<string>Gooch</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>Gooch warm/cool toon shading model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-000000000003</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>EdgeFuzzPlugIn</string>
+			<key>displayName</key>
+			<string>Edge Fuzz</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>Edge glow and fuzz shading model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-000000000004</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>GlossyWetPlugIn</string>
+			<key>displayName</key>
+			<string>Glossy Wet Highlight</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>Glossy wet-surface highlight shading model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-000000000005</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>HemispherePlugIn</string>
+			<key>displayName</key>
+			<string>Hemisphere</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>Ambient hemisphere lighting model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-000000000006</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>LambSkinPlugIn</string>
+			<key>displayName</key>
+			<string>Lamb Skin</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>Lambertian skin rolloff shading model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-000000000007</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>LUTSkinPlugIn</string>
+			<key>displayName</key>
+			<string>LUT Skin</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>LUT-based skin tone shading model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-000000000008</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>ThinFilmPlugIn</string>
+			<key>displayName</key>
+			<string>Thin Film</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>Iridescent thin-film shading model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-000000000009</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>EnvMapPlugIn</string>
+			<key>displayName</key>
+			<string>Environment Map</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>Environment reflection shading model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-00000000000A</string>
+			<key>version</key>
+			<string>1.0</string>
+		</dict>
+		<dict>
+			<key>className</key>
+			<string>VelvetPlugIn</string>
+			<key>displayName</key>
+			<string>Velvet</string>
+			<key>group</key>
+			<string>A1B2C3D4-E5F6-7890-ABCD-EF1234567890</string>
+			<key>infoString</key>
+			<string>Velvet microfiber shading model</string>
+			<key>protocolNames</key>
+			<array>
+				<string>FxFilter</string>
+			</array>
+			<key>uuid</key>
+			<string>C1000001-0000-0000-0000-00000000000B</string>
 			<key>version</key>
 			<string>1.0</string>
 		</dict>

@@ -5,172 +5,119 @@ import os.log
 
 private let lmLog = OSLog(subsystem: "com.dalebradshaw.LightingModels", category: "Plugin")
 
-// MARK: - Shader IDs
+// MARK: - Shader index constants (matches Metal switch statement)
 
-enum ShaderID: Int {
-    case blinn            = 0
-    case phong            = 1
-    case gooch            = 2
-    case edgeFuzz         = 3
-    case glossyWet        = 4
-    case hemisphere       = 5
-    case lambSkin         = 6
-    case lutSkin          = 7
-    case thinFilm         = 8
-    case envMap           = 9
-    case velvet           = 10
-}
+let kShaderBlinn:       Int32 = 0
+let kShaderPhong:       Int32 = 1
+let kShaderGooch:       Int32 = 2
+let kShaderEdgeFuzz:    Int32 = 3
+let kShaderGlossyWet:   Int32 = 4
+let kShaderHemisphere:  Int32 = 5
+let kShaderLambSkin:    Int32 = 6
+let kShaderLUTSkin:     Int32 = 7
+let kShaderThinFilm:    Int32 = 8
+let kShaderEnvMap:      Int32 = 9
+let kShaderVelvet:      Int32 = 10
 
-// MARK: - Parameter IDs
-//
-//  1       global shader selector
-//  100–    Blinn group
-//  200–    Phong group
-//  300–    Gooch group
-//  400–    EdgeFuzz group
-//  500–    GlossyWet group
-//  600–    Hemisphere group
-//  700–    LambSkin group
-//  800–    LUTSkin group
-//  900–    ThinFilm group
-//  1000–   EnvMap group
-//  1100–   Velvet group
-
-let kParamShaderSelect: UInt32 = 1
-
-// Groups (sub-group IDs)
-let kGroupBlinn:      UInt32 = 100
-let kGroupPhong:      UInt32 = 200
-let kGroupGooch:      UInt32 = 300
-let kGroupEdgeFuzz:   UInt32 = 400
-let kGroupGlossyWet:  UInt32 = 500
-let kGroupHemisphere: UInt32 = 600
-let kGroupLambSkin:   UInt32 = 700
-let kGroupLUTSkin:    UInt32 = 800
-let kGroupThinFilm:   UInt32 = 900
-let kGroupEnvMap:     UInt32 = 1000
-let kGroupVelvet:     UInt32 = 1100
+// MARK: - Parameter IDs (flat; each class only uses its own)
 
 // Blinn
-let kParamBlinnLightColor: UInt32 = 101
+let kBlinnLightColor: UInt32 = 1
 
 // Phong
-let kParamPhongLightColor:   UInt32 = 201
-let kParamPhongShininess:    UInt32 = 202
-let kParamPhongSpecular:     UInt32 = 203
-let kParamPhongAmbientColor: UInt32 = 204
+let kPhongLightColor:   UInt32 = 1
+let kPhongAmbientColor: UInt32 = 2
+let kPhongShininess:    UInt32 = 3
+let kPhongSpecular:     UInt32 = 4
 
 // Gooch
-let kParamGoochWarmColor:  UInt32 = 301
-let kParamGoochCoolColor:  UInt32 = 302
-let kParamGoochDiffWarm:   UInt32 = 303
-let kParamGoochDiffCool:   UInt32 = 304
+let kGoochWarmColor:  UInt32 = 1
+let kGoochCoolColor:  UInt32 = 2
+let kGoochDiffWarm:   UInt32 = 3
+let kGoochDiffCool:   UInt32 = 4
 
 // EdgeFuzz
-let kParamEdgeLightColor:   UInt32 = 401
-let kParamEdgeEdgeColor:    UInt32 = 402
-let kParamEdgeSurfaceColor: UInt32 = 403
-let kParamEdgeAmbientColor: UInt32 = 404
-let kParamEdgeSpecularity:  UInt32 = 405
-let kParamEdgeFuzziness:    UInt32 = 406
-let kParamEdgeFade:         UInt32 = 407
+let kEdgeLightColor:   UInt32 = 1
+let kEdgeEdgeColor:    UInt32 = 2
+let kEdgeSurfaceColor: UInt32 = 3
+let kEdgeAmbientColor: UInt32 = 4
+let kEdgeSpecularity:  UInt32 = 5
+let kEdgeFuzziness:    UInt32 = 6
+let kEdgeFade:         UInt32 = 7
 
 // GlossyWet
-let kParamGlossSpecColor:   UInt32 = 501
-let kParamGlossDiffColor:   UInt32 = 502
-let kParamGlossAmbColor:    UInt32 = 503
-let kParamGlossSpecExp:     UInt32 = 504
-let kParamGlossSpec:        UInt32 = 505
-let kParamGlossMax:         UInt32 = 506
-let kParamGlossMin:         UInt32 = 507
-let kParamGlossDrop:        UInt32 = 508
+let kGlossSpecColor: UInt32 = 1
+let kGlossDiffColor: UInt32 = 2
+let kGlossAmbColor:  UInt32 = 3
+let kGlossSpecExp:   UInt32 = 4
+let kGlossSpec:      UInt32 = 5
+let kGlossMax:       UInt32 = 6
+let kGlossMin:       UInt32 = 7
+let kGlossDrop:      UInt32 = 8
 
 // Hemisphere
-let kParamHemiSkyColor:    UInt32 = 601
-let kParamHemiGroundColor: UInt32 = 602
+let kHemiSkyColor:    UInt32 = 1
+let kHemiGroundColor: UInt32 = 2
 
 // LambSkin
-let kParamLambAmbientColor: UInt32 = 701
-let kParamLambDiffuseColor: UInt32 = 702
-let kParamLambSubColor:     UInt32 = 703
-let kParamLambRolloff:      UInt32 = 704
+let kLambAmbientColor: UInt32 = 1
+let kLambDiffuseColor: UInt32 = 2
+let kLambSubColor:     UInt32 = 3
+let kLambRolloff:      UInt32 = 4
 
 // LUTSkin
-let kParamLUTDiffuseColor:  UInt32 = 801
-let kParamLUTSpecularColor: UInt32 = 802
-let kParamLUTSkinImage:     UInt32 = 803   // image well → SkinLUT
+let kLUTDiffuseColor:  UInt32 = 1
+let kLUTSpecularColor: UInt32 = 2
+let kLUTSkinImage:     UInt32 = 3
 
 // ThinFilm
-let kParamThinFilmDepth:    UInt32 = 901
-let kParamThinFringeImage:  UInt32 = 902   // image well → FringeMap
+let kThinFilmDepth:    UInt32 = 1
+let kThinFringeImage:  UInt32 = 2
 
 // EnvMap
-let kParamEnvImage:         UInt32 = 1001  // image well → Environment texture
-let kParamEnvRatio:         UInt32 = 1002
+let kEnvImage: UInt32 = 1
+let kEnvRatio: UInt32 = 2
 
 // Velvet
-let kParamVelvetUnderColor: UInt32 = 1101
-let kParamVelvetRolloff:    UInt32 = 1102
+let kVelvetUnderColor: UInt32 = 1
+let kVelvetRolloff:    UInt32 = 2
 
-// Shaders that supply an image well (need scheduleInputs)
-let kImageWellParams: [Int: UInt32] = [7: kParamLUTSkinImage, 8: kParamThinFringeImage, 9: kParamEnvImage]
-
-// MARK: - Plugin State
+// MARK: - Plugin State (shared across all shaders — Metal reads only the fields it needs)
 
 struct LightingPluginState {
     var shaderIndex: Int32
     var hasAuxTexture: Int32
 
-    // Blinn / Phong / Hemisphere / EnvMap / EdgeFuzz — shared light color
     var lightR: Float; var lightG: Float; var lightB: Float
-
-    // Phong
     var shininess: Float; var specular: Float
     var ambR: Float; var ambG: Float; var ambB: Float
-
-    // Gooch
     var warmR: Float; var warmG: Float; var warmB: Float
     var coolR: Float; var coolG: Float; var coolB: Float
     var diffWarm: Float; var diffCool: Float
-
-    // EdgeFuzz
     var edgeSpecularity: Float; var edgeFuzziness: Float; var edgeFade: Float
     var edgeColorR: Float; var edgeColorG: Float; var edgeColorB: Float
     var surfaceColorR: Float; var surfaceColorG: Float; var surfaceColorB: Float
     var ambientColorR: Float; var ambientColorG: Float; var ambientColorB: Float
-
-    // GlossyWet
     var glossSpecExp: Float; var glossSpec: Float
     var glossMax: Float; var glossMin: Float; var glossDrop: Float
     var specColorR: Float; var specColorG: Float; var specColorB: Float
     var diffColorR: Float; var diffColorG: Float; var diffColorB: Float
     var glossAmbR: Float; var glossAmbG: Float; var glossAmbB: Float
-
-    // LambSkin
     var lambRolloff: Float
     var lambAmbR: Float; var lambAmbG: Float; var lambAmbB: Float
     var lambDiffR: Float; var lambDiffG: Float; var lambDiffB: Float
     var lambSubR: Float; var lambSubG: Float; var lambSubB: Float
-
-    // LUTSkin
     var lutDiffR: Float; var lutDiffG: Float; var lutDiffB: Float
     var lutSpecR: Float; var lutSpecG: Float; var lutSpecB: Float
-
-    // ThinFilm
     var filmDepth: Float
-
-    // EnvMap
     var envRatio: Float
-
-    // Velvet
     var velvetRolloff: Float
     var velvetUnderR: Float; var velvetUnderG: Float; var velvetUnderB: Float
 }
 
-// MARK: - Plugin
+// MARK: - Base class (shared render + scheduleInputs logic)
 
-@objc(LightingModelsPlugIn)
-class LightingModelsPlugIn: NSObject, FxTileableEffect {
+class LightingBasePlugIn: NSObject, FxTileableEffect {
 
     let _apiManager: PROAPIAccessing
 
@@ -178,149 +125,39 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         _apiManager = apiManager
     }
 
-    // MARK: Helpers
+    // Subclasses override these two:
+    var shaderIndex: Int32 { fatalError("override shaderIndex") }
+    /// Return nil if this shader has no image well; return the paramID if it does.
+    var imageWellParamID: UInt32? { return nil }
 
-    private func creationAPI() -> FxParameterCreationAPI_v5 {
+    // MARK: API helpers
+
+    func creationAPI() -> FxParameterCreationAPI_v5 {
         return _apiManager.api(for: FxParameterCreationAPI_v5.self) as! FxParameterCreationAPI_v5
     }
-    private func retrievalAPI() -> FxParameterRetrievalAPI_v6? {
+    func retrievalAPI() -> FxParameterRetrievalAPI_v6? {
         return _apiManager.api(for: FxParameterRetrievalAPI_v6.self) as? FxParameterRetrievalAPI_v6
     }
 
-    private func addColor(_ p: FxParameterCreationAPI_v5,
-                          name: String, id: UInt32,
-                          r: Double, g: Double, b: Double) {
+    func addColor(_ p: FxParameterCreationAPI_v5, name: String, id: UInt32,
+                  r: Double, g: Double, b: Double) {
         p.addColorParameter(withName: name, parameterID: id,
                             defaultRed: r, defaultGreen: g, defaultBlue: b,
                             parameterFlags: FxParameterFlags(kFxParameterFlag_DEFAULT))
     }
-
-    private func addSlider(_ p: FxParameterCreationAPI_v5,
-                           name: String, id: UInt32,
-                           def: Double, min: Double, max: Double,
-                           sMin: Double, sMax: Double, delta: Double) {
+    func addSlider(_ p: FxParameterCreationAPI_v5, name: String, id: UInt32,
+                   def: Double, min: Double, max: Double,
+                   sMin: Double, sMax: Double, delta: Double) {
         p.addFloatSlider(withName: name, parameterID: id,
                          defaultValue: def, parameterMin: min, parameterMax: max,
                          sliderMin: sMin, sliderMax: sMax, delta: delta,
                          parameterFlags: FxParameterFlags(kFxParameterFlag_DEFAULT))
     }
 
-    // MARK: Parameters
+    // MARK: FxTileableEffect — addParameters (subclasses override)
 
     func addParameters() throws {
-        let p = creationAPI()
-        let show    = FxParameterFlags(kFxParameterFlag_DEFAULT)
-        let notAnim = FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE)
-
-        // ── Shader selector ──────────────────────────────────────────────
-        let shaderNames = ["Blinn", "Phong Point Light", "Gooch", "Edge Fuzz",
-                           "Glossy Wet Highlight", "Hemisphere", "Lamb Skin",
-                           "LUT Skin", "Thin Film", "Environment Map", "Velvet"]
-        p.addPopupMenu(withName: "Shader Model", parameterID: kParamShaderSelect,
-                       defaultValue: 1, menuEntries: shaderNames,
-                       parameterFlags: FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE))
-
-        // ── Blinn ─────────────────────────────────────────────────────────
-        p.startParameterSubGroup("Blinn", parameterID: kGroupBlinn, parameterFlags: show)
-            addColor(p, name: "Light Color", id: kParamBlinnLightColor, r: 1, g: 1, b: 1)
-        p.endParameterSubGroup()
-
-        // ── Phong ────────────────────────────────────────────────────────
-        p.startParameterSubGroup("Phong", parameterID: kGroupPhong, parameterFlags: show)
-            addColor(p, name: "Light Color",   id: kParamPhongLightColor,   r: 1,   g: 1,   b: 1)
-            addColor(p, name: "Ambient Color", id: kParamPhongAmbientColor, r: 0.1, g: 0.1, b: 0.1)
-            addSlider(p, name: "Shininess", id: kParamPhongShininess,
-                      def: 32, min: 1, max: 256, sMin: 1, sMax: 128, delta: 1)
-            addSlider(p, name: "Specular", id: kParamPhongSpecular,
-                      def: 0.5, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-        p.endParameterSubGroup()
-
-        // ── Gooch ────────────────────────────────────────────────────────
-        p.startParameterSubGroup("Gooch", parameterID: kGroupGooch, parameterFlags: show)
-            addColor(p, name: "Warm Color", id: kParamGoochWarmColor, r: 0.8, g: 0.4, b: 0.0)
-            addColor(p, name: "Cool Color", id: kParamGoochCoolColor, r: 0.0, g: 0.2, b: 0.6)
-            addSlider(p, name: "Diffuse Warm", id: kParamGoochDiffWarm,
-                      def: 0.45, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-            addSlider(p, name: "Diffuse Cool", id: kParamGoochDiffCool,
-                      def: 0.45, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-        p.endParameterSubGroup()
-
-        // ── EdgeFuzz ─────────────────────────────────────────────────────
-        p.startParameterSubGroup("Edge Fuzz", parameterID: kGroupEdgeFuzz, parameterFlags: show)
-            addColor(p, name: "Light Color",   id: kParamEdgeLightColor,   r: 1,   g: 1,   b: 1)
-            addColor(p, name: "Edge Color",    id: kParamEdgeEdgeColor,    r: 0,   g: 0,   b: 0)
-            addColor(p, name: "Surface Color", id: kParamEdgeSurfaceColor, r: 0.7, g: 0.7, b: 0.7)
-            addColor(p, name: "Ambient Color", id: kParamEdgeAmbientColor, r: 0.1, g: 0.1, b: 0.1)
-            addSlider(p, name: "Specularity", id: kParamEdgeSpecularity,
-                      def: 10, min: 0, max: 100, sMin: 0, sMax: 50, delta: 0.5)
-            addSlider(p, name: "Fuzziness", id: kParamEdgeFuzziness,
-                      def: 3, min: 0.1, max: 20, sMin: 0.1, sMax: 10, delta: 0.1)
-            addSlider(p, name: "Edge Fade", id: kParamEdgeFade,
-                      def: 0.5, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-        p.endParameterSubGroup()
-
-        // ── GlossyWet ────────────────────────────────────────────────────
-        p.startParameterSubGroup("Glossy Wet", parameterID: kGroupGlossyWet, parameterFlags: show)
-            addColor(p, name: "Specular Color", id: kParamGlossSpecColor, r: 1,    g: 1,    b: 1)
-            addColor(p, name: "Diffuse Color",  id: kParamGlossDiffColor, r: 0.5,  g: 0.5,  b: 0.5)
-            addColor(p, name: "Ambient Color",  id: kParamGlossAmbColor,  r: 0.05, g: 0.05, b: 0.05)
-            addSlider(p, name: "Specular Exponent", id: kParamGlossSpecExp,
-                      def: 64, min: 1, max: 512, sMin: 1, sMax: 256, delta: 1)
-            addSlider(p, name: "Specularity", id: kParamGlossSpec,
-                      def: 0.8, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-            addSlider(p, name: "Gloss Max", id: kParamGlossMax,
-                      def: 0.95, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-            addSlider(p, name: "Gloss Min", id: kParamGlossMin,
-                      def: 0.5, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-            addSlider(p, name: "Gloss Drop", id: kParamGlossDrop,
-                      def: 0.1, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-        p.endParameterSubGroup()
-
-        // ── Hemisphere ───────────────────────────────────────────────────
-        p.startParameterSubGroup("Hemisphere", parameterID: kGroupHemisphere, parameterFlags: show)
-            addColor(p, name: "Sky Color",    id: kParamHemiSkyColor,    r: 0.4, g: 0.6, b: 1.0)
-            addColor(p, name: "Ground Color", id: kParamHemiGroundColor, r: 0.2, g: 0.15, b: 0.1)
-        p.endParameterSubGroup()
-
-        // ── LambSkin ─────────────────────────────────────────────────────
-        p.startParameterSubGroup("Lamb Skin", parameterID: kGroupLambSkin, parameterFlags: show)
-            addColor(p, name: "Ambient Color",   id: kParamLambAmbientColor, r: 0.05, g: 0.05, b: 0.05)
-            addColor(p, name: "Diffuse Color",   id: kParamLambDiffuseColor, r: 0.8,  g: 0.6,  b: 0.5)
-            addColor(p, name: "Subsurface Color",id: kParamLambSubColor,     r: 0.8,  g: 0.2,  b: 0.1)
-            addSlider(p, name: "Rolloff", id: kParamLambRolloff,
-                      def: 0.3, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-        p.endParameterSubGroup()
-
-        // ── LUTSkin ──────────────────────────────────────────────────────
-        p.startParameterSubGroup("LUT Skin", parameterID: kGroupLUTSkin, parameterFlags: show)
-            addColor(p, name: "Diffuse Color",  id: kParamLUTDiffuseColor,  r: 0.9, g: 0.7, b: 0.6)
-            addColor(p, name: "Specular Color", id: kParamLUTSpecularColor, r: 0.8, g: 0.7, b: 0.6)
-            p.addImageReference(withName: "Skin LUT", parameterID: kParamLUTSkinImage,
-                                parameterFlags: notAnim)
-        p.endParameterSubGroup()
-
-        // ── ThinFilm ─────────────────────────────────────────────────────
-        p.startParameterSubGroup("Thin Film", parameterID: kGroupThinFilm, parameterFlags: show)
-            addSlider(p, name: "Film Depth", id: kParamThinFilmDepth,
-                      def: 1.0, min: 0, max: 5, sMin: 0, sMax: 3, delta: 0.05)
-            p.addImageReference(withName: "Fringe Map", parameterID: kParamThinFringeImage,
-                                parameterFlags: notAnim)
-        p.endParameterSubGroup()
-
-        // ── EnvMap ───────────────────────────────────────────────────────
-        p.startParameterSubGroup("Environment Map", parameterID: kGroupEnvMap, parameterFlags: show)
-            p.addImageReference(withName: "Environment", parameterID: kParamEnvImage,
-                                parameterFlags: notAnim)
-            addSlider(p, name: "Mix Ratio", id: kParamEnvRatio,
-                      def: 0.5, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-        p.endParameterSubGroup()
-
-        // ── Velvet ───────────────────────────────────────────────────────
-        p.startParameterSubGroup("Velvet", parameterID: kGroupVelvet, parameterFlags: show)
-            addColor(p, name: "Under Color", id: kParamVelvetUnderColor, r: 0.3, g: 0.1, b: 0.1)
-            addSlider(p, name: "Rolloff", id: kParamVelvetRolloff,
-                      def: 0.3, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
-        p.endParameterSubGroup()
+        // subclasses implement
     }
 
     // MARK: Properties
@@ -335,151 +172,72 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         properties?.pointee = props
     }
 
-    // MARK: scheduleInputs — declare image-well textures as additional sources
+    // MARK: scheduleInputs
 
     func scheduleInputs(_ inputImageRequests: AutoreleasingUnsafeMutablePointer<NSArray?>?,
                         withPluginState pluginState: Data?,
                         atTime renderTime: CMTime,
                         error outError: NSError?) -> Bool {
-        // Always include source clip
         var requests: [FxImageTileRequest] = [
             FxImageTileRequest(source: kFxImageTileRequestSourceEffectClip,
                                time: renderTime,
                                includeFilters: true,
                                parameterID: 0)!
         ]
-
-        // If shader uses an image well, schedule it too
-        if let stateData = pluginState,
-           stateData.count >= MemoryLayout<LightingPluginState>.size {
-            let state = stateData.withUnsafeBytes {
-                $0.bindMemory(to: LightingPluginState.self).baseAddress!.pointee
-            }
-            if let wellParamID = kImageWellParams[Int(state.shaderIndex)],
-               let req = FxImageTileRequest(source: kFxImageTileRequestSourceParameter,
-                                            time: renderTime,
-                                            includeFilters: false,
-                                            parameterID: wellParamID) {
-                requests.append(req)
-            }
+        if let wellID = imageWellParamID,
+           let req = FxImageTileRequest(source: kFxImageTileRequestSourceParameter,
+                                        time: renderTime,
+                                        includeFilters: false,
+                                        parameterID: wellID) {
+            requests.append(req)
         }
         inputImageRequests?.pointee = requests as NSArray
         return true
     }
 
-    // MARK: Plugin State snapshot
+    // MARK: pluginState — subclasses override to populate their fields
 
     func pluginState(_ pluginState: AutoreleasingUnsafeMutablePointer<NSData>?,
                      at renderTime: CMTime,
                      quality qualityLevel: UInt) throws {
-        guard let r = retrievalAPI() else { return }
-
-        func f(_ id: UInt32) -> Float {
-            var v = 0.0; r.getFloatValue(&v, fromParameter: id, at: renderTime); return Float(v)
-        }
-        func i(_ id: UInt32) -> Int32 {
-            var v: Int32 = 0; r.getIntValue(&v, fromParameter: id, at: renderTime); return v
-        }
-        func rgb(_ id: UInt32) -> (Float, Float, Float) {
-            var red = 0.0, green = 0.0, blue = 0.0
-            r.getRedValue(&red, greenValue: &green, blueValue: &blue, fromParameter: id, at: renderTime)
-            return (Float(red), Float(green), Float(blue))
-        }
-
-        let shaderIdx = i(kParamShaderSelect) - 1  // popup 1-based → 0-based
-
-        let blinnLight = rgb(kParamBlinnLightColor)
-        let phongLight = rgb(kParamPhongLightColor)
-        let phongAmb   = rgb(kParamPhongAmbientColor)
-        let goochWarm  = rgb(kParamGoochWarmColor)
-        let goochCool  = rgb(kParamGoochCoolColor)
-        let edgeLight  = rgb(kParamEdgeLightColor)
-        let edgeEdge   = rgb(kParamEdgeEdgeColor)
-        let edgeSurf   = rgb(kParamEdgeSurfaceColor)
-        let edgeAmb    = rgb(kParamEdgeAmbientColor)
-        let glossSpec  = rgb(kParamGlossSpecColor)
-        let glossDiff  = rgb(kParamGlossDiffColor)
-        let glossAmb   = rgb(kParamGlossAmbColor)
-        let lambAmb    = rgb(kParamLambAmbientColor)
-        let lambDiff   = rgb(kParamLambDiffuseColor)
-        let lambSub    = rgb(kParamLambSubColor)
-        let lutDiff    = rgb(kParamLUTDiffuseColor)
-        let lutSpec    = rgb(kParamLUTSpecularColor)
-        let velvetUnder = rgb(kParamVelvetUnderColor)
-        let hemiSky    = rgb(kParamHemiSkyColor)
-
-        // Hemisphere uses sky+ground color; pack sky into light and ground into amb
-        let hemiGround = rgb(kParamHemiGroundColor)
-
-        // Choose the right light color based on active shader
-        var lightR: Float; var lightG: Float; var lightB: Float
-        var ambR: Float;   var ambG: Float;   var ambB: Float
-        switch Int(shaderIdx) {
-        case ShaderID.blinn.rawValue, ShaderID.envMap.rawValue:
-            (lightR, lightG, lightB) = blinnLight
-            (ambR, ambG, ambB)       = (0, 0, 0)
-        case ShaderID.phong.rawValue:
-            (lightR, lightG, lightB) = phongLight
-            (ambR, ambG, ambB)       = phongAmb
-        case ShaderID.hemisphere.rawValue:
-            (lightR, lightG, lightB) = hemiSky
-            (ambR, ambG, ambB)       = hemiGround
-        case ShaderID.edgeFuzz.rawValue:
-            (lightR, lightG, lightB) = edgeLight
-            (ambR, ambG, ambB)       = edgeAmb
-        default:
-            (lightR, lightG, lightB) = (1, 1, 1)
-            (ambR, ambG, ambB)       = (0, 0, 0)
-        }
-
-        // Does this shader have an image well parameter scheduled?
-        let hasAux: Int32 = kImageWellParams[Int(shaderIdx)] != nil ? 1 : 0
-
         var state = LightingPluginState(
-            shaderIndex: shaderIdx,
-            hasAuxTexture: hasAux,
-
-            lightR: lightR, lightG: lightG, lightB: lightB,
-
-            shininess: f(kParamPhongShininess),
-            specular:  f(kParamPhongSpecular),
-            ambR: ambR, ambG: ambG, ambB: ambB,
-
-            warmR: goochWarm.0, warmG: goochWarm.1, warmB: goochWarm.2,
-            coolR: goochCool.0, coolG: goochCool.1, coolB: goochCool.2,
-            diffWarm: f(kParamGoochDiffWarm),
-            diffCool: f(kParamGoochDiffCool),
-
-            edgeSpecularity: f(kParamEdgeSpecularity),
-            edgeFuzziness:   f(kParamEdgeFuzziness),
-            edgeFade:        f(kParamEdgeFade),
-            edgeColorR: edgeEdge.0, edgeColorG: edgeEdge.1, edgeColorB: edgeEdge.2,
-            surfaceColorR: edgeSurf.0, surfaceColorG: edgeSurf.1, surfaceColorB: edgeSurf.2,
-            ambientColorR: edgeAmb.0, ambientColorG: edgeAmb.1, ambientColorB: edgeAmb.2,
-
-            glossSpecExp: f(kParamGlossSpecExp),
-            glossSpec:    f(kParamGlossSpec),
-            glossMax:     f(kParamGlossMax),
-            glossMin:     f(kParamGlossMin),
-            glossDrop:    f(kParamGlossDrop),
-            specColorR: glossSpec.0, specColorG: glossSpec.1, specColorB: glossSpec.2,
-            diffColorR: glossDiff.0, diffColorG: glossDiff.1, diffColorB: glossDiff.2,
-            glossAmbR:  glossAmb.0,  glossAmbG:  glossAmb.1,  glossAmbB:  glossAmb.2,
-
-            lambRolloff: f(kParamLambRolloff),
-            lambAmbR: lambAmb.0,  lambAmbG: lambAmb.1,  lambAmbB: lambAmb.2,
-            lambDiffR: lambDiff.0, lambDiffG: lambDiff.1, lambDiffB: lambDiff.2,
-            lambSubR: lambSub.0,  lambSubG: lambSub.1,  lambSubB: lambSub.2,
-
-            lutDiffR: lutDiff.0, lutDiffG: lutDiff.1, lutDiffB: lutDiff.2,
-            lutSpecR: lutSpec.0, lutSpecG: lutSpec.1, lutSpecB: lutSpec.2,
-
-            filmDepth: f(kParamThinFilmDepth),
-            envRatio:  f(kParamEnvRatio),
-            velvetRolloff: f(kParamVelvetRolloff),
-            velvetUnderR: velvetUnder.0, velvetUnderG: velvetUnder.1, velvetUnderB: velvetUnder.2
+            shaderIndex: shaderIndex,
+            hasAuxTexture: imageWellParamID != nil ? 1 : 0,
+            lightR: 1, lightG: 1, lightB: 1,
+            shininess: 32, specular: 0.5,
+            ambR: 0, ambG: 0, ambB: 0,
+            warmR: 0.8, warmG: 0.4, warmB: 0,
+            coolR: 0, coolG: 0.2, coolB: 0.6,
+            diffWarm: 0.45, diffCool: 0.45,
+            edgeSpecularity: 10, edgeFuzziness: 3, edgeFade: 0.5,
+            edgeColorR: 0, edgeColorG: 0, edgeColorB: 0,
+            surfaceColorR: 0.7, surfaceColorG: 0.7, surfaceColorB: 0.7,
+            ambientColorR: 0.1, ambientColorG: 0.1, ambientColorB: 0.1,
+            glossSpecExp: 64, glossSpec: 0.8,
+            glossMax: 0.95, glossMin: 0.5, glossDrop: 0.1,
+            specColorR: 1, specColorG: 1, specColorB: 1,
+            diffColorR: 0.5, diffColorG: 0.5, diffColorB: 0.5,
+            glossAmbR: 0.05, glossAmbG: 0.05, glossAmbB: 0.05,
+            lambRolloff: 0.3,
+            lambAmbR: 0.05, lambAmbG: 0.05, lambAmbB: 0.05,
+            lambDiffR: 0.8,  lambDiffG: 0.6,  lambDiffB: 0.5,
+            lambSubR: 0.8,   lambSubG: 0.2,   lambSubB: 0.1,
+            lutDiffR: 0.9, lutDiffG: 0.7, lutDiffB: 0.6,
+            lutSpecR: 0.8, lutSpecG: 0.7, lutSpecB: 0.6,
+            filmDepth: 1.0,
+            envRatio: 0.5,
+            velvetRolloff: 0.3,
+            velvetUnderR: 0.3, velvetUnderG: 0.1, velvetUnderB: 0.1
         )
+        populateState(&state, retrieval: retrievalAPI(), at: renderTime)
         pluginState?.pointee = NSData(bytes: &state, length: MemoryLayout<LightingPluginState>.size)
+    }
+
+    /// Subclasses override to read their params into the state struct.
+    func populateState(_ state: inout LightingPluginState,
+                       retrieval r: FxParameterRetrievalAPI_v6?,
+                       at time: CMTime) {
+        // base does nothing; subclasses fill in their fields
     }
 
     // MARK: Tile sizing
@@ -514,8 +272,6 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         var state = stateData.withUnsafeBytes {
             $0.bindMemory(to: LightingPluginState.self).baseAddress!.pointee
         }
-
-        // If we expected an aux texture but didn't get one, clear the flag
         if state.hasAuxTexture == 1 && sourceImages.count < 2 {
             state.hasAuxTexture = 0
         }
@@ -533,9 +289,9 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
             commandBuffer.commit(); return
         }
         let inputTexture  = sourceImages[0].metalTexture(for: inputDevice)!
-        let outputTexture = destinationImage.metalTexture(for: deviceCache.device(with: destinationImage.deviceRegistryID)!)!
+        let outputTexture = destinationImage.metalTexture(
+            for: deviceCache.device(with: destinationImage.deviceRegistryID)!)!
 
-        // Optional aux texture (image well)
         var auxTexture: MTLTexture? = nil
         if state.hasAuxTexture == 1, sourceImages.count >= 2 {
             auxTexture = sourceImages[1].metalTexture(for: inputDevice)
@@ -549,7 +305,6 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         rpd.colorAttachments[0] = colorAttachment
 
         let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: rpd)!
-
         let outputWidth  = destinationImage.tilePixelBounds.right  - destinationImage.tilePixelBounds.left
         let outputHeight = destinationImage.tilePixelBounds.top    - destinationImage.tilePixelBounds.bottom
 
@@ -570,7 +325,6 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
             commandEncoder.endEncoding(); commandBuffer.commit(); return
         }
         commandEncoder.setRenderPipelineState(pipelineState)
-
         commandEncoder.setVertexBytes(&vertices,
                                       length: MemoryLayout<Vertex2D>.size * 4,
                                       index: Int(LM_BVI_Vertices.rawValue))
@@ -587,37 +341,29 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         var uniforms = LightingUniforms(
             shaderIndex:    state.shaderIndex,
             hasAuxTexture:  state.hasAuxTexture,
-
             lightR: state.lightR, lightG: state.lightG, lightB: state.lightB,
-
             shininess: state.shininess, specular: state.specular,
             ambR: state.ambR, ambG: state.ambG, ambB: state.ambB,
-
             warmR: state.warmR, warmG: state.warmG, warmB: state.warmB,
             coolR: state.coolR, coolG: state.coolG, coolB: state.coolB,
             diffWarm: state.diffWarm, diffCool: state.diffCool,
-
             edgeSpecularity: state.edgeSpecularity,
             edgeFuzziness:   state.edgeFuzziness,
             edgeFade:        state.edgeFade,
             edgeColorR: state.edgeColorR, edgeColorG: state.edgeColorG, edgeColorB: state.edgeColorB,
             surfaceColorR: state.surfaceColorR, surfaceColorG: state.surfaceColorG, surfaceColorB: state.surfaceColorB,
             ambientColorR: state.ambientColorR, ambientColorG: state.ambientColorG, ambientColorB: state.ambientColorB,
-
             glossSpecExp: state.glossSpecExp, glossSpec: state.glossSpec,
             glossMax: state.glossMax, glossMin: state.glossMin, glossDrop: state.glossDrop,
             specColorR: state.specColorR, specColorG: state.specColorG, specColorB: state.specColorB,
             diffColorR: state.diffColorR, diffColorG: state.diffColorG, diffColorB: state.diffColorB,
             glossAmbR:  state.glossAmbR,  glossAmbG:  state.glossAmbG,  glossAmbB:  state.glossAmbB,
-
             lambRolloff: state.lambRolloff,
             lambAmbR: state.lambAmbR, lambAmbG: state.lambAmbG, lambAmbB: state.lambAmbB,
             lambDiffR: state.lambDiffR, lambDiffG: state.lambDiffG, lambDiffB: state.lambDiffB,
             lambSubR: state.lambSubR, lambSubG: state.lambSubG, lambSubB: state.lambSubB,
-
             lutDiffR: state.lutDiffR, lutDiffG: state.lutDiffG, lutDiffB: state.lutDiffB,
             lutSpecR: state.lutSpecR, lutSpecG: state.lutSpecG, lutSpecB: state.lutSpecB,
-
             filmDepth: state.filmDepth,
             envRatio:  state.envRatio,
             velvetRolloff: state.velvetRolloff,
@@ -632,5 +378,323 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
         deviceCache.returnCommandQueueToCache(commandQueue: commandQueue)
+    }
+}
+
+// MARK: - Helpers for reading params
+
+private func rgb(_ r: FxParameterRetrievalAPI_v6, _ id: UInt32, _ time: CMTime) -> (Float, Float, Float) {
+    var red = 0.0, green = 0.0, blue = 0.0
+    r.getRedValue(&red, greenValue: &green, blueValue: &blue, fromParameter: id, at: time)
+    return (Float(red), Float(green), Float(blue))
+}
+private func flt(_ r: FxParameterRetrievalAPI_v6, _ id: UInt32, _ time: CMTime) -> Float {
+    var v = 0.0; r.getFloatValue(&v, fromParameter: id, at: time); return Float(v)
+}
+
+// MARK: - 11 Concrete Shader Classes
+
+// ── Blinn ────────────────────────────────────────────────────────────────────
+
+@objc(BlinnPlugIn)
+class BlinnPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32 { kShaderBlinn }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addColor(p, name: "Light Color", id: kBlinnLightColor, r: 1, g: 1, b: 1)
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        let c = rgb(r, kBlinnLightColor, time)
+        state.lightR = c.0; state.lightG = c.1; state.lightB = c.2
+    }
+}
+
+// ── Phong ─────────────────────────────────────────────────────────────────────
+
+@objc(PhongPlugIn)
+class PhongPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32 { kShaderPhong }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addColor(p, name: "Light Color",   id: kPhongLightColor,   r: 1,   g: 1,   b: 1)
+        addColor(p, name: "Ambient Color", id: kPhongAmbientColor, r: 0.1, g: 0.1, b: 0.1)
+        addSlider(p, name: "Shininess", id: kPhongShininess,
+                  def: 32, min: 1, max: 256, sMin: 1, sMax: 128, delta: 1)
+        addSlider(p, name: "Specular", id: kPhongSpecular,
+                  def: 0.5, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        let light = rgb(r, kPhongLightColor, time)
+        let amb   = rgb(r, kPhongAmbientColor, time)
+        state.lightR = light.0; state.lightG = light.1; state.lightB = light.2
+        state.ambR   = amb.0;   state.ambG   = amb.1;   state.ambB   = amb.2
+        state.shininess = flt(r, kPhongShininess, time)
+        state.specular  = flt(r, kPhongSpecular,  time)
+    }
+}
+
+// ── Gooch ─────────────────────────────────────────────────────────────────────
+
+@objc(GoochPlugIn)
+class GoochPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32 { kShaderGooch }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addColor(p, name: "Warm Color", id: kGoochWarmColor, r: 0.8, g: 0.4, b: 0.0)
+        addColor(p, name: "Cool Color", id: kGoochCoolColor, r: 0.0, g: 0.2, b: 0.6)
+        addSlider(p, name: "Diffuse Warm", id: kGoochDiffWarm,
+                  def: 0.45, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+        addSlider(p, name: "Diffuse Cool", id: kGoochDiffCool,
+                  def: 0.45, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        let warm = rgb(r, kGoochWarmColor, time)
+        let cool = rgb(r, kGoochCoolColor, time)
+        state.warmR = warm.0; state.warmG = warm.1; state.warmB = warm.2
+        state.coolR = cool.0; state.coolG = cool.1; state.coolB = cool.2
+        state.diffWarm = flt(r, kGoochDiffWarm, time)
+        state.diffCool = flt(r, kGoochDiffCool, time)
+    }
+}
+
+// ── EdgeFuzz ──────────────────────────────────────────────────────────────────
+
+@objc(EdgeFuzzPlugIn)
+class EdgeFuzzPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32 { kShaderEdgeFuzz }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addColor(p, name: "Light Color",   id: kEdgeLightColor,   r: 1,   g: 1,   b: 1)
+        addColor(p, name: "Edge Color",    id: kEdgeEdgeColor,    r: 0,   g: 0,   b: 0)
+        addColor(p, name: "Surface Color", id: kEdgeSurfaceColor, r: 0.7, g: 0.7, b: 0.7)
+        addColor(p, name: "Ambient Color", id: kEdgeAmbientColor, r: 0.1, g: 0.1, b: 0.1)
+        addSlider(p, name: "Specularity", id: kEdgeSpecularity,
+                  def: 10, min: 0, max: 100, sMin: 0, sMax: 50, delta: 0.5)
+        addSlider(p, name: "Fuzziness", id: kEdgeFuzziness,
+                  def: 3, min: 0.1, max: 20, sMin: 0.1, sMax: 10, delta: 0.1)
+        addSlider(p, name: "Edge Fade", id: kEdgeFade,
+                  def: 0.5, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        let light = rgb(r, kEdgeLightColor, time)
+        let edge  = rgb(r, kEdgeEdgeColor,  time)
+        let surf  = rgb(r, kEdgeSurfaceColor, time)
+        let amb   = rgb(r, kEdgeAmbientColor, time)
+        state.lightR = light.0; state.lightG = light.1; state.lightB = light.2
+        state.edgeColorR = edge.0; state.edgeColorG = edge.1; state.edgeColorB = edge.2
+        state.surfaceColorR = surf.0; state.surfaceColorG = surf.1; state.surfaceColorB = surf.2
+        state.ambientColorR = amb.0; state.ambientColorG = amb.1; state.ambientColorB = amb.2
+        state.edgeSpecularity = flt(r, kEdgeSpecularity, time)
+        state.edgeFuzziness   = flt(r, kEdgeFuzziness,   time)
+        state.edgeFade        = flt(r, kEdgeFade,        time)
+    }
+}
+
+// ── GlossyWet ─────────────────────────────────────────────────────────────────
+
+@objc(GlossyWetPlugIn)
+class GlossyWetPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32 { kShaderGlossyWet }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addColor(p, name: "Specular Color", id: kGlossSpecColor, r: 1,    g: 1,    b: 1)
+        addColor(p, name: "Diffuse Color",  id: kGlossDiffColor, r: 0.5,  g: 0.5,  b: 0.5)
+        addColor(p, name: "Ambient Color",  id: kGlossAmbColor,  r: 0.05, g: 0.05, b: 0.05)
+        addSlider(p, name: "Specular Exponent", id: kGlossSpecExp,
+                  def: 64, min: 1, max: 512, sMin: 1, sMax: 256, delta: 1)
+        addSlider(p, name: "Specularity", id: kGlossSpec,
+                  def: 0.8, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+        addSlider(p, name: "Gloss Max",  id: kGlossMax,
+                  def: 0.95, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+        addSlider(p, name: "Gloss Min",  id: kGlossMin,
+                  def: 0.5,  min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+        addSlider(p, name: "Gloss Drop", id: kGlossDrop,
+                  def: 0.1,  min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        let spec = rgb(r, kGlossSpecColor, time)
+        let diff = rgb(r, kGlossDiffColor, time)
+        let amb  = rgb(r, kGlossAmbColor,  time)
+        state.specColorR = spec.0; state.specColorG = spec.1; state.specColorB = spec.2
+        state.diffColorR = diff.0; state.diffColorG = diff.1; state.diffColorB = diff.2
+        state.glossAmbR  = amb.0;  state.glossAmbG  = amb.1;  state.glossAmbB  = amb.2
+        state.glossSpecExp = flt(r, kGlossSpecExp, time)
+        state.glossSpec    = flt(r, kGlossSpec,    time)
+        state.glossMax     = flt(r, kGlossMax,     time)
+        state.glossMin     = flt(r, kGlossMin,     time)
+        state.glossDrop    = flt(r, kGlossDrop,    time)
+    }
+}
+
+// ── Hemisphere ────────────────────────────────────────────────────────────────
+
+@objc(HemispherePlugIn)
+class HemispherePlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32 { kShaderHemisphere }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addColor(p, name: "Sky Color",    id: kHemiSkyColor,    r: 0.4, g: 0.6, b: 1.0)
+        addColor(p, name: "Ground Color", id: kHemiGroundColor, r: 0.2, g: 0.15, b: 0.1)
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        let sky    = rgb(r, kHemiSkyColor,    time)
+        let ground = rgb(r, kHemiGroundColor, time)
+        // Hemisphere packs sky→light, ground→amb
+        state.lightR = sky.0;    state.lightG = sky.1;    state.lightB = sky.2
+        state.ambR   = ground.0; state.ambG   = ground.1; state.ambB   = ground.2
+    }
+}
+
+// ── LambSkin ──────────────────────────────────────────────────────────────────
+
+@objc(LambSkinPlugIn)
+class LambSkinPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32 { kShaderLambSkin }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addColor(p, name: "Ambient Color",    id: kLambAmbientColor, r: 0.05, g: 0.05, b: 0.05)
+        addColor(p, name: "Diffuse Color",    id: kLambDiffuseColor, r: 0.8,  g: 0.6,  b: 0.5)
+        addColor(p, name: "Subsurface Color", id: kLambSubColor,     r: 0.8,  g: 0.2,  b: 0.1)
+        addSlider(p, name: "Rolloff", id: kLambRolloff,
+                  def: 0.3, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        let amb  = rgb(r, kLambAmbientColor, time)
+        let diff = rgb(r, kLambDiffuseColor, time)
+        let sub  = rgb(r, kLambSubColor,     time)
+        state.lambAmbR  = amb.0;  state.lambAmbG  = amb.1;  state.lambAmbB  = amb.2
+        state.lambDiffR = diff.0; state.lambDiffG = diff.1; state.lambDiffB = diff.2
+        state.lambSubR  = sub.0;  state.lambSubG  = sub.1;  state.lambSubB  = sub.2
+        state.lambRolloff = flt(r, kLambRolloff, time)
+    }
+}
+
+// ── LUTSkin ───────────────────────────────────────────────────────────────────
+
+@objc(LUTSkinPlugIn)
+class LUTSkinPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32   { kShaderLUTSkin }
+    override var imageWellParamID: UInt32? { kLUTSkinImage }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addColor(p, name: "Diffuse Color",  id: kLUTDiffuseColor,  r: 0.9, g: 0.7, b: 0.6)
+        addColor(p, name: "Specular Color", id: kLUTSpecularColor, r: 0.8, g: 0.7, b: 0.6)
+        p.addImageReference(withName: "Skin LUT", parameterID: kLUTSkinImage,
+                            parameterFlags: FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE))
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        let diff = rgb(r, kLUTDiffuseColor,  time)
+        let spec = rgb(r, kLUTSpecularColor, time)
+        state.lutDiffR = diff.0; state.lutDiffG = diff.1; state.lutDiffB = diff.2
+        state.lutSpecR = spec.0; state.lutSpecG = spec.1; state.lutSpecB = spec.2
+    }
+}
+
+// ── ThinFilm ──────────────────────────────────────────────────────────────────
+
+@objc(ThinFilmPlugIn)
+class ThinFilmPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32   { kShaderThinFilm }
+    override var imageWellParamID: UInt32? { kThinFringeImage }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addSlider(p, name: "Film Depth", id: kThinFilmDepth,
+                  def: 1.0, min: 0, max: 5, sMin: 0, sMax: 3, delta: 0.05)
+        p.addImageReference(withName: "Fringe Map", parameterID: kThinFringeImage,
+                            parameterFlags: FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE))
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        state.filmDepth = flt(r, kThinFilmDepth, time)
+    }
+}
+
+// ── EnvMap ────────────────────────────────────────────────────────────────────
+
+@objc(EnvMapPlugIn)
+class EnvMapPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32   { kShaderEnvMap }
+    override var imageWellParamID: UInt32? { kEnvImage }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        p.addImageReference(withName: "Environment", parameterID: kEnvImage,
+                            parameterFlags: FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE))
+        addSlider(p, name: "Mix Ratio", id: kEnvRatio,
+                  def: 0.5, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        state.envRatio = flt(r, kEnvRatio, time)
+    }
+}
+
+// ── Velvet ────────────────────────────────────────────────────────────────────
+
+@objc(VelvetPlugIn)
+class VelvetPlugIn: LightingBasePlugIn {
+    override var shaderIndex: Int32 { kShaderVelvet }
+
+    override func addParameters() throws {
+        let p = creationAPI()
+        addColor(p, name: "Under Color", id: kVelvetUnderColor, r: 0.3, g: 0.1, b: 0.1)
+        addSlider(p, name: "Rolloff", id: kVelvetRolloff,
+                  def: 0.3, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
+    }
+
+    override func populateState(_ state: inout LightingPluginState,
+                                retrieval r: FxParameterRetrievalAPI_v6?,
+                                at time: CMTime) {
+        guard let r else { return }
+        let under = rgb(r, kVelvetUnderColor, time)
+        state.velvetUnderR = under.0; state.velvetUnderG = under.1; state.velvetUnderB = under.2
+        state.velvetRolloff = flt(r, kVelvetRolloff, time)
     }
 }
