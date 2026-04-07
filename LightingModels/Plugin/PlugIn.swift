@@ -138,6 +138,9 @@ class LightingBasePlugIn: NSObject, FxTileableEffect {
     func retrievalAPI() -> FxParameterRetrievalAPI_v6? {
         return _apiManager.api(for: FxParameterRetrievalAPI_v6.self) as? FxParameterRetrievalAPI_v6
     }
+    func retrievalAPIv7() -> FxParameterRetrievalAPI_v7? {
+        return _apiManager.api(for: FxParameterRetrievalAPI_v7.self) as? FxParameterRetrievalAPI_v7
+    }
 
     func addColor(_ p: FxParameterCreationAPI_v5, name: String, id: UInt32,
                   r: Double, g: Double, b: Double) {
@@ -184,7 +187,19 @@ class LightingBasePlugIn: NSObject, FxTileableEffect {
                                includeFilters: true,
                                parameterID: 0)!
         ]
-        if let wellID = imageWellParamID,
+        // Only schedule the image well request when an image is actually connected.
+        // We read hasAuxTexture from the pluginState that was produced by pluginState(_:atTime:quality:),
+        // which uses FxParameterRetrievalAPI_v7 to detect whether the well is populated.
+        var hasAux = false
+        if let data = pluginState,
+           data.count >= MemoryLayout<LightingPluginState>.size {
+            let state = data.withUnsafeBytes {
+                $0.bindMemory(to: LightingPluginState.self).baseAddress!.pointee
+            }
+            hasAux = state.hasAuxTexture == 1
+        }
+        if hasAux,
+           let wellID = imageWellParamID,
            let req = FxImageTileRequest(source: kFxImageTileRequestSourceParameter,
                                         time: renderTime,
                                         includeFilters: false,
@@ -200,9 +215,20 @@ class LightingBasePlugIn: NSObject, FxTileableEffect {
     func pluginState(_ pluginState: AutoreleasingUnsafeMutablePointer<NSData>?,
                      at renderTime: CMTime,
                      quality qualityLevel: UInt) throws {
+        // Determine whether an image is actually connected to the well.
+        // FxParameterRetrievalAPI_v7.imageSize(_:fromParameter:atTime:error:) returns YES
+        // only when a clip/image is assigned; returns NO (and sets error) when the well is empty.
+        var auxConnected: Int32 = 0
+        if let wellID = imageWellParamID,
+           let rv7 = retrievalAPIv7() {
+            var sz = CGSize.zero
+            let connected = (try? rv7.imageSize(&sz, fromParameter: wellID, at: renderTime)) != nil
+            auxConnected = connected ? 1 : 0
+        }
+
         var state = LightingPluginState(
             shaderIndex: shaderIndex,
-            hasAuxTexture: imageWellParamID != nil ? 1 : 0,
+            hasAuxTexture: auxConnected,
             lightR: 1, lightG: 1, lightB: 1,
             shininess: 32, specular: 0.5,
             ambR: 0, ambG: 0, ambB: 0,
