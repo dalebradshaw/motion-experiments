@@ -340,7 +340,8 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
 
     // MARK: parameterChanged — show/hide sub-groups
 
-    func parameterChanged(_ paramID: UInt32, atTime time: CMTime, error: NSError?) -> Bool {
+    func parameterChanged(_ paramID: UInt32, atTime time: CMTime,
+                          error outError: AutoreleasingUnsafeMutablePointer<NSError?>?) -> Bool {
         guard paramID == kParamShaderSelect else { return true }
 
         let r = retrievalAPI()
@@ -365,7 +366,7 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
             kFxPropertyKey_IsThreadSafe:              NSNumber(booleanLiteral: true),
             kFxPropertyKey_MayRemapTime:              NSNumber(booleanLiteral: false),
             kFxPropertyKey_PixelTransformSupport:     NSNumber(value: kFxPixelTransform_ScaleTranslate),
-            kFxPropertyKey_VariesWhenParamsAreStatic: NSNumber(booleanLiteral: false)
+            kFxPropertyKey_VariesWhenParamsAreStatic: NSNumber(booleanLiteral: true)
         ]
         properties?.pointee = props
     }
