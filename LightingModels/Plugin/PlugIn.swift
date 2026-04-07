@@ -1,6 +1,9 @@
 import Foundation
 import Metal
 import FxPlug
+import os.log
+
+private let lmLog = OSLog(subsystem: "com.dalebradshaw.LightingModels", category: "Plugin")
 
 // MARK: - Shader IDs
 
@@ -109,16 +112,6 @@ let kParamEnvRatio:         UInt32 = 1002
 let kParamVelvetUnderColor: UInt32 = 1101
 let kParamVelvetRolloff:    UInt32 = 1102
 
-// Which groups are associated with each shader (for hide/show)
-let kAllGroups: [UInt32] = [kGroupBlinn, kGroupPhong, kGroupGooch, kGroupEdgeFuzz,
-                             kGroupGlossyWet, kGroupHemisphere, kGroupLambSkin,
-                             kGroupLUTSkin, kGroupThinFilm, kGroupEnvMap, kGroupVelvet]
-let kGroupForShader: [Int: UInt32] = [
-    0: kGroupBlinn, 1: kGroupPhong, 2: kGroupGooch, 3: kGroupEdgeFuzz,
-    4: kGroupGlossyWet, 5: kGroupHemisphere, 6: kGroupLambSkin,
-    7: kGroupLUTSkin, 8: kGroupThinFilm, 9: kGroupEnvMap, 10: kGroupVelvet
-]
-
 // Shaders that supply an image well (need scheduleInputs)
 let kImageWellParams: [Int: UInt32] = [7: kParamLUTSkinImage, 8: kParamThinFringeImage, 9: kParamEnvImage]
 
@@ -190,41 +183,33 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
     private func creationAPI() -> FxParameterCreationAPI_v5 {
         return _apiManager.api(for: FxParameterCreationAPI_v5.self) as! FxParameterCreationAPI_v5
     }
-    private func retrievalAPI() -> FxParameterRetrievalAPI_v6 {
-        return _apiManager.api(for: FxParameterRetrievalAPI_v6.self) as! FxParameterRetrievalAPI_v6
-    }
-    private func settingAPI() -> FxParameterSettingAPI_v5 {
-        return _apiManager.api(for: FxParameterSettingAPI_v5.self) as! FxParameterSettingAPI_v5
+    private func retrievalAPI() -> FxParameterRetrievalAPI_v6? {
+        return _apiManager.api(for: FxParameterRetrievalAPI_v6.self) as? FxParameterRetrievalAPI_v6
     }
 
     private func addColor(_ p: FxParameterCreationAPI_v5,
                           name: String, id: UInt32,
-                          r: Double, g: Double, b: Double,
-                          hidden: Bool = false) {
-        let flags = FxParameterFlags(hidden ? kFxParameterFlag_HIDDEN : kFxParameterFlag_DEFAULT)
+                          r: Double, g: Double, b: Double) {
         p.addColorParameter(withName: name, parameterID: id,
                             defaultRed: r, defaultGreen: g, defaultBlue: b,
-                            parameterFlags: flags)
+                            parameterFlags: FxParameterFlags(kFxParameterFlag_DEFAULT))
     }
 
     private func addSlider(_ p: FxParameterCreationAPI_v5,
                            name: String, id: UInt32,
                            def: Double, min: Double, max: Double,
-                           sMin: Double, sMax: Double, delta: Double,
-                           hidden: Bool = false) {
-        let flags = FxParameterFlags(hidden ? kFxParameterFlag_HIDDEN : kFxParameterFlag_DEFAULT)
+                           sMin: Double, sMax: Double, delta: Double) {
         p.addFloatSlider(withName: name, parameterID: id,
                          defaultValue: def, parameterMin: min, parameterMax: max,
                          sliderMin: sMin, sliderMax: sMax, delta: delta,
-                         parameterFlags: flags)
+                         parameterFlags: FxParameterFlags(kFxParameterFlag_DEFAULT))
     }
 
     // MARK: Parameters
 
     func addParameters() throws {
         let p = creationAPI()
-        let def  = FxParameterFlags(kFxParameterFlag_DEFAULT)
-        let hide = FxParameterFlags(kFxParameterFlag_HIDDEN)
+        let show    = FxParameterFlags(kFxParameterFlag_DEFAULT)
         let notAnim = FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE)
 
         // ── Shader selector ──────────────────────────────────────────────
@@ -235,13 +220,13 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
                        defaultValue: 1, menuEntries: shaderNames,
                        parameterFlags: FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE))
 
-        // ── Blinn ────────────────────────────────────────────────────────
-        p.startParameterSubGroup("Blinn", parameterID: kGroupBlinn, parameterFlags: def)
+        // ── Blinn ─────────────────────────────────────────────────────────
+        p.startParameterSubGroup("Blinn", parameterID: kGroupBlinn, parameterFlags: show)
             addColor(p, name: "Light Color", id: kParamBlinnLightColor, r: 1, g: 1, b: 1)
         p.endParameterSubGroup()
 
         // ── Phong ────────────────────────────────────────────────────────
-        p.startParameterSubGroup("Phong", parameterID: kGroupPhong, parameterFlags: hide)
+        p.startParameterSubGroup("Phong", parameterID: kGroupPhong, parameterFlags: show)
             addColor(p, name: "Light Color",   id: kParamPhongLightColor,   r: 1,   g: 1,   b: 1)
             addColor(p, name: "Ambient Color", id: kParamPhongAmbientColor, r: 0.1, g: 0.1, b: 0.1)
             addSlider(p, name: "Shininess", id: kParamPhongShininess,
@@ -251,7 +236,7 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         p.endParameterSubGroup()
 
         // ── Gooch ────────────────────────────────────────────────────────
-        p.startParameterSubGroup("Gooch", parameterID: kGroupGooch, parameterFlags: hide)
+        p.startParameterSubGroup("Gooch", parameterID: kGroupGooch, parameterFlags: show)
             addColor(p, name: "Warm Color", id: kParamGoochWarmColor, r: 0.8, g: 0.4, b: 0.0)
             addColor(p, name: "Cool Color", id: kParamGoochCoolColor, r: 0.0, g: 0.2, b: 0.6)
             addSlider(p, name: "Diffuse Warm", id: kParamGoochDiffWarm,
@@ -261,7 +246,7 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         p.endParameterSubGroup()
 
         // ── EdgeFuzz ─────────────────────────────────────────────────────
-        p.startParameterSubGroup("Edge Fuzz", parameterID: kGroupEdgeFuzz, parameterFlags: hide)
+        p.startParameterSubGroup("Edge Fuzz", parameterID: kGroupEdgeFuzz, parameterFlags: show)
             addColor(p, name: "Light Color",   id: kParamEdgeLightColor,   r: 1,   g: 1,   b: 1)
             addColor(p, name: "Edge Color",    id: kParamEdgeEdgeColor,    r: 0,   g: 0,   b: 0)
             addColor(p, name: "Surface Color", id: kParamEdgeSurfaceColor, r: 0.7, g: 0.7, b: 0.7)
@@ -275,7 +260,7 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         p.endParameterSubGroup()
 
         // ── GlossyWet ────────────────────────────────────────────────────
-        p.startParameterSubGroup("Glossy Wet", parameterID: kGroupGlossyWet, parameterFlags: hide)
+        p.startParameterSubGroup("Glossy Wet", parameterID: kGroupGlossyWet, parameterFlags: show)
             addColor(p, name: "Specular Color", id: kParamGlossSpecColor, r: 1,    g: 1,    b: 1)
             addColor(p, name: "Diffuse Color",  id: kParamGlossDiffColor, r: 0.5,  g: 0.5,  b: 0.5)
             addColor(p, name: "Ambient Color",  id: kParamGlossAmbColor,  r: 0.05, g: 0.05, b: 0.05)
@@ -292,13 +277,13 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         p.endParameterSubGroup()
 
         // ── Hemisphere ───────────────────────────────────────────────────
-        p.startParameterSubGroup("Hemisphere", parameterID: kGroupHemisphere, parameterFlags: hide)
+        p.startParameterSubGroup("Hemisphere", parameterID: kGroupHemisphere, parameterFlags: show)
             addColor(p, name: "Sky Color",    id: kParamHemiSkyColor,    r: 0.4, g: 0.6, b: 1.0)
             addColor(p, name: "Ground Color", id: kParamHemiGroundColor, r: 0.2, g: 0.15, b: 0.1)
         p.endParameterSubGroup()
 
         // ── LambSkin ─────────────────────────────────────────────────────
-        p.startParameterSubGroup("Lamb Skin", parameterID: kGroupLambSkin, parameterFlags: hide)
+        p.startParameterSubGroup("Lamb Skin", parameterID: kGroupLambSkin, parameterFlags: show)
             addColor(p, name: "Ambient Color",   id: kParamLambAmbientColor, r: 0.05, g: 0.05, b: 0.05)
             addColor(p, name: "Diffuse Color",   id: kParamLambDiffuseColor, r: 0.8,  g: 0.6,  b: 0.5)
             addColor(p, name: "Subsurface Color",id: kParamLambSubColor,     r: 0.8,  g: 0.2,  b: 0.1)
@@ -307,7 +292,7 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         p.endParameterSubGroup()
 
         // ── LUTSkin ──────────────────────────────────────────────────────
-        p.startParameterSubGroup("LUT Skin", parameterID: kGroupLUTSkin, parameterFlags: hide)
+        p.startParameterSubGroup("LUT Skin", parameterID: kGroupLUTSkin, parameterFlags: show)
             addColor(p, name: "Diffuse Color",  id: kParamLUTDiffuseColor,  r: 0.9, g: 0.7, b: 0.6)
             addColor(p, name: "Specular Color", id: kParamLUTSpecularColor, r: 0.8, g: 0.7, b: 0.6)
             p.addImageReference(withName: "Skin LUT", parameterID: kParamLUTSkinImage,
@@ -315,7 +300,7 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         p.endParameterSubGroup()
 
         // ── ThinFilm ─────────────────────────────────────────────────────
-        p.startParameterSubGroup("Thin Film", parameterID: kGroupThinFilm, parameterFlags: hide)
+        p.startParameterSubGroup("Thin Film", parameterID: kGroupThinFilm, parameterFlags: show)
             addSlider(p, name: "Film Depth", id: kParamThinFilmDepth,
                       def: 1.0, min: 0, max: 5, sMin: 0, sMax: 3, delta: 0.05)
             p.addImageReference(withName: "Fringe Map", parameterID: kParamThinFringeImage,
@@ -323,7 +308,7 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         p.endParameterSubGroup()
 
         // ── EnvMap ───────────────────────────────────────────────────────
-        p.startParameterSubGroup("Environment Map", parameterID: kGroupEnvMap, parameterFlags: hide)
+        p.startParameterSubGroup("Environment Map", parameterID: kGroupEnvMap, parameterFlags: show)
             p.addImageReference(withName: "Environment", parameterID: kParamEnvImage,
                                 parameterFlags: notAnim)
             addSlider(p, name: "Mix Ratio", id: kParamEnvRatio,
@@ -331,32 +316,11 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
         p.endParameterSubGroup()
 
         // ── Velvet ───────────────────────────────────────────────────────
-        p.startParameterSubGroup("Velvet", parameterID: kGroupVelvet, parameterFlags: hide)
+        p.startParameterSubGroup("Velvet", parameterID: kGroupVelvet, parameterFlags: show)
             addColor(p, name: "Under Color", id: kParamVelvetUnderColor, r: 0.3, g: 0.1, b: 0.1)
             addSlider(p, name: "Rolloff", id: kParamVelvetRolloff,
                       def: 0.3, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
         p.endParameterSubGroup()
-    }
-
-    // MARK: parameterChanged — show/hide sub-groups
-
-    func parameterChanged(_ paramID: UInt32, atTime time: CMTime,
-                          error outError: AutoreleasingUnsafeMutablePointer<NSError?>?) -> Bool {
-        guard paramID == kParamShaderSelect else { return true }
-
-        let r = retrievalAPI()
-        var rawSelection: Int32 = 1
-        r.getIntValue(&rawSelection, fromParameter: kParamShaderSelect, at: time)
-        let shaderIdx = Int(rawSelection) - 1  // popup is 1-based
-
-        let s = settingAPI()
-        let hidden  = FxParameterFlags(kFxParameterFlag_HIDDEN)
-        let visible = FxParameterFlags(kFxParameterFlag_DEFAULT)
-
-        for (idx, groupID) in kGroupForShader {
-            s.setParameterFlags(idx == shaderIdx ? visible : hidden, toParameter: groupID)
-        }
-        return true
     }
 
     // MARK: Properties
@@ -408,7 +372,7 @@ class LightingModelsPlugIn: NSObject, FxTileableEffect {
     func pluginState(_ pluginState: AutoreleasingUnsafeMutablePointer<NSData>?,
                      at renderTime: CMTime,
                      quality qualityLevel: UInt) throws {
-        let r = retrievalAPI()
+        guard let r = retrievalAPI() else { return }
 
         func f(_ id: UInt32) -> Float {
             var v = 0.0; r.getFloatValue(&v, fromParameter: id, at: renderTime); return Float(v)
