@@ -1,0 +1,7 @@
+framework module PluginManager {
+  umbrella header "PROAPIAccessing.h"
+  header "PROPlugInBundleRegistration.h"
+  header "PROPlugProtocols.h"
+  export *
+  module * { export * }
+}

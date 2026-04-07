@@ -1,0 +1,3 @@
+import FxPlug
+
+FxPrincipal.startServicePrincipal()

@@ -1,0 +1,483 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F001 /* AppDelegate.swift */; };
+		A002 /* PlugIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = F002 /* PlugIn.swift */; };
+		A003 /* MetalDeviceCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F003 /* MetalDeviceCache.swift */; };
+		A004 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F004 /* main.swift */; };
+		A005 /* LightingModels.metal in Sources */ = {isa = PBXBuildFile; fileRef = F005 /* LightingModels.metal */; };
+		A006 /* ShaderTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = F006 /* ShaderTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A007 /* LightingModelsXPC.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = T002 /* LightingModelsXPC.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A008 /* FxPlug.framework in Frameworks (App) */ = {isa = PBXBuildFile; fileRef = F010 /* FxPlug.framework */; };
+		A009 /* FxPlug.framework in Frameworks (XPC) */ = {isa = PBXBuildFile; fileRef = F010 /* FxPlug.framework */; };
+		A010 /* WrapperApp-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = F011 /* WrapperApp-Bridging-Header.h */; };
+		A011 /* XPC-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = F012 /* XPC-Bridging-Header.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		PROXY01 = {
+			isa = PBXContainerItemProxy;
+			containerPortal = PROJ01 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = T002;
+			remoteInfo = LightingModelsXPC;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CP01 /* Embed XPC Services */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				A007 /* LightingModelsXPC.xpc in Embed XPC Services */,
+			);
+			name = "Embed XPC Services";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		F001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F002 /* PlugIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlugIn.swift; sourceTree = "<group>"; };
+		F003 /* MetalDeviceCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalDeviceCache.swift; sourceTree = "<group>"; };
+		F004 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		F005 /* LightingModels.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = LightingModels.metal; sourceTree = "<group>"; };
+		F006 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
+		F007 /* WrapperApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WrapperApp-Info.plist"; sourceTree = "<group>"; };
+		F008 /* XPC-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "XPC-Info.plist"; sourceTree = "<group>"; };
+		F009 /* LightingModels.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LightingModels.entitlements; sourceTree = "<group>"; };
+		F010 /* FxPlug.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FxPlug.framework; path = "/Library/Developer/Frameworks/FxPlug.framework"; sourceTree = "<absolute>"; };
+		F011 /* WrapperApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WrapperApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		F012 /* XPC-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "XPC-Bridging-Header.h"; sourceTree = "<group>"; };
+		T001 /* LightingModels.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LightingModels.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		T002 /* LightingModelsXPC.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = "LightingModelsXPC.xpc"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FB01 /* Frameworks (App) */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A008 /* FxPlug.framework in Frameworks (App) */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FB02 /* Frameworks (XPC) */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A009 /* FxPlug.framework in Frameworks (XPC) */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		GRP_ROOT = {
+			isa = PBXGroup;
+			children = (
+				GRP_APP,
+				GRP_XPC,
+				GRP_FW,
+				GRP_PRODUCTS,
+			);
+			sourceTree = "<group>";
+		};
+		GRP_APP = {
+			isa = PBXGroup;
+			children = (
+				F001 /* AppDelegate.swift */,
+				F007 /* WrapperApp-Info.plist */,
+				F009 /* LightingModels.entitlements */,
+				F011 /* WrapperApp-Bridging-Header.h */,
+			);
+			name = "WrapperApp";
+			path = WrapperApp;
+			sourceTree = "<group>";
+		};
+		GRP_XPC = {
+			isa = PBXGroup;
+			children = (
+				F002 /* PlugIn.swift */,
+				F003 /* MetalDeviceCache.swift */,
+				F004 /* main.swift */,
+				F005 /* LightingModels.metal */,
+				F006 /* ShaderTypes.h */,
+				F008 /* XPC-Info.plist */,
+				F012 /* XPC-Bridging-Header.h */,
+			);
+			name = "Plugin (XPC)";
+			path = Plugin;
+			sourceTree = "<group>";
+		};
+		GRP_FW = {
+			isa = PBXGroup;
+			children = (
+				F010 /* FxPlug.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		GRP_PRODUCTS = {
+			isa = PBXGroup;
+			children = (
+				T001 /* LightingModels.app */,
+				T002 /* LightingModelsXPC.xpc */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		TGT_APP /* LightingModels */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BCL_APP;
+			buildPhases = (
+				SRC_APP /* Sources */,
+				FB01 /* Frameworks */,
+				CP01 /* Embed XPC Services */,
+			);
+			buildRules = ();
+			dependencies = (
+				DEP01,
+			);
+			name = LightingModels;
+			productName = LightingModels;
+			productReference = T001 /* LightingModels.app */;
+			productType = "com.apple.product-type.application";
+		};
+		TGT_XPC /* LightingModelsXPC */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BCL_XPC;
+			buildPhases = (
+				SRC_XPC /* Sources */,
+				FB02 /* Frameworks */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = LightingModelsXPC;
+			productName = LightingModelsXPC;
+			productReference = T002 /* LightingModelsXPC.xpc */;
+			productType = "com.apple.product-type.xpc-service";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXTargetDependency section */
+		DEP01 = {
+			isa = PBXTargetDependency;
+			target = TGT_XPC /* LightingModelsXPC */;
+			targetProxy = PROXY01;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXProject section */
+		PROJ01 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					TGT_APP = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					TGT_XPC = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = BCL_PROJ;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = GRP_ROOT;
+			productRefGroup = GRP_PRODUCTS;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				TGT_APP /* LightingModels */,
+				TGT_XPC /* LightingModelsXPC */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		SRC_APP /* Sources (App) */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A001 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		SRC_XPC /* Sources (XPC) */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A002 /* PlugIn.swift in Sources */,
+				A003 /* MetalDeviceCache.swift in Sources */,
+				A004 /* main.swift in Sources */,
+				A005 /* LightingModels.metal in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		BC_PROJ_DEBUG = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BC_PROJ_RELEASE = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		BC_APP_DEBUG = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				CODE_SIGN_ENTITLEMENTS = "WrapperApp/LightingModels.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "WrapperApp/WrapperApp-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dalebradshaw.LightingModels";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "WrapperApp/WrapperApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks",
+					"/Library/Developer/Frameworks",
+				);
+			};
+			name = Debug;
+		};
+		BC_APP_RELEASE = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				CODE_SIGN_ENTITLEMENTS = "WrapperApp/LightingModels.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "WrapperApp/WrapperApp-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dalebradshaw.LightingModels";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "WrapperApp/WrapperApp-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks",
+					"/Library/Developer/Frameworks",
+				);
+			};
+			name = Release;
+		};
+		BC_XPC_DEBUG = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "Plugin/XPC-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dalebradshaw.LightingModels.xpc";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Plugin/XPC-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks",
+					"/Library/Developer/Frameworks",
+				);
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/Plugin";
+			};
+			name = Debug;
+		};
+		BC_XPC_RELEASE = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "Plugin/XPC-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.dalebradshaw.LightingModels.xpc";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Plugin/XPC-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks",
+					"/Library/Developer/Frameworks",
+				);
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/Plugin";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BCL_PROJ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC_PROJ_DEBUG /* Debug */,
+				BC_PROJ_RELEASE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BCL_APP = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC_APP_DEBUG /* Debug */,
+				BC_APP_RELEASE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BCL_XPC = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BC_XPC_DEBUG /* Debug */,
+				BC_XPC_RELEASE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = PROJ01 /* Project object */;
+}
