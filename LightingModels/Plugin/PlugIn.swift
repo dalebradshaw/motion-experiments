@@ -3,7 +3,7 @@ import Metal
 import FxPlug
 import os.log
 
-private let lmLog = OSLog(subsystem: "com.dalebradshaw.LightingModels", category: "Plugin")
+private let lmLog = OSLog(subsystem: "com.dalebradshaw.LightingModels", category: "plugin")
 
 // MARK: - Shader index constants (matches Metal switch statement)
 
@@ -123,6 +123,7 @@ class LightingBasePlugIn: NSObject, FxTileableEffect {
 
     required init?(apiManager: PROAPIAccessing) {
         _apiManager = apiManager
+        super.init()
     }
 
     // Subclasses override these two:
@@ -166,11 +167,12 @@ class LightingBasePlugIn: NSObject, FxTileableEffect {
     // MARK: Properties
 
     func properties(_ properties: AutoreleasingUnsafeMutablePointer<NSDictionary>?) throws {
+        // Match Apple's FxPictureInPicture example exactly — only these two keys.
+        // kFxPropertyKey_IsThreadSafe was removed in FxPlug 4.2.8 SDK (release notes).
+        // kFxPropertyKey_VariesWhenParamsAreStatic is not used by Apple's image well examples.
         let props: NSDictionary = [
-            kFxPropertyKey_IsThreadSafe:              NSNumber(booleanLiteral: true),
             kFxPropertyKey_MayRemapTime:              NSNumber(booleanLiteral: false),
             kFxPropertyKey_PixelTransformSupport:     NSNumber(value: kFxPixelTransform_ScaleTranslate),
-            kFxPropertyKey_VariesWhenParamsAreStatic: NSNumber(booleanLiteral: true)
         ]
         properties?.pointee = props
     }
@@ -181,26 +183,35 @@ class LightingBasePlugIn: NSObject, FxTileableEffect {
                         withPluginState pluginState: Data?,
                         atTime renderTime: CMTime,
                         error outError: NSError?) -> Bool {
-        var requests: [FxImageTileRequest] = [
-            FxImageTileRequest(source: kFxImageTileRequestSourceEffectClip,
-                               time: renderTime,
-                               includeFilters: true,
-                               parameterID: 0)!
-        ]
-        // Always declare the image well as a potential input source (when this shader has one)
-        // so that Motion knows it is a valid drop target, regardless of whether it is currently
-        // populated.  FxImageTileRequest(_:) returns nil when the well is empty, so no actual
-        // image data is requested in that case — Motion simply sees the slot as schedulable and
-        // enables the drop UI.  The hasAuxTexture guard in renderDestinationImage already handles
-        // the case where sourceImages[1] is absent at render time.
-        if let wellID = imageWellParamID,
-           let req = FxImageTileRequest(source: kFxImageTileRequestSourceParameter,
-                                        time: renderTime,
-                                        includeFilters: false,
-                                        parameterID: wellID) {
-            requests.append(req)
+        os_log(.default, log: lmLog,
+               "scheduleInputs: shaderIndex=%{public}d wellParamID=%{public}@ time=%.3f",
+               shaderIndex,
+               imageWellParamID.map { String($0) } ?? "nil",
+               CMTimeGetSeconds(renderTime))
+
+        let clipReq = FxImageTileRequest(source: kFxImageTileRequestSourceEffectClip,
+                                         time: renderTime,
+                                         includeFilters: true,
+                                         parameterID: 0)
+        os_log(.default, log: lmLog, "clipReq=%{public}@", clipReq == nil ? "nil" : "OK")
+        var requests: [FxImageTileRequest] = [clipReq!]
+
+        if let wellID = imageWellParamID {
+            let wellReq = FxImageTileRequest(source: kFxImageTileRequestSourceParameter,
+                                             time: renderTime,
+                                             includeFilters: true,
+                                             parameterID: wellID)
+            os_log(.default, log: lmLog, "wellReq paramID=%{public}u = %{public}@",
+                   wellID, wellReq == nil ? "nil" : "OK")
+            if let req = wellReq {
+                requests.append(req)
+                os_log(.default, log: lmLog, "appended wellReq, total=%{public}d", requests.count)
+            } else {
+                os_log(.error, log: lmLog, "wellReq was nil — skipping (empty well)")
+            }
         }
         inputImageRequests?.pointee = requests as NSArray
+        os_log(.default, log: lmLog, "returning %{public}d requests", requests.count)
         return true
     }
 
@@ -218,6 +229,10 @@ class LightingBasePlugIn: NSObject, FxTileableEffect {
             var sz = CGSize.zero
             let connected = (try? rv7.imageSize(&sz, fromParameter: wellID, at: renderTime)) != nil
             auxConnected = connected ? 1 : 0
+            NSLog("[LM] pluginState: wellID=%u connected=%d size=%.0fx%.0f", wellID, auxConnected, sz.width, sz.height)
+            os_log(.default, log: lmLog,
+                   "pluginState: wellID=%{public}u connected=%{public}d size=%{public}.0fx%{public}.0f",
+                   wellID, auxConnected, sz.width, sz.height)
         }
 
         var state = LightingPluginState(
@@ -635,8 +650,10 @@ class LUTSkinPlugIn: LightingBasePlugIn {
         let p = creationAPI()
         addColor(p, name: "Diffuse Color",  id: kLUTDiffuseColor,  r: 0.9, g: 0.7, b: 0.6)
         addColor(p, name: "Specular Color", id: kLUTSpecularColor, r: 0.8, g: 0.7, b: 0.6)
+        os_log(.default, log: lmLog, "LUTSkin: adding image reference 'Skin LUT' paramID=%{public}u flags=DEFAULT", kLUTSkinImage)
         p.addImageReference(withName: "Skin LUT", parameterID: kLUTSkinImage,
-                            parameterFlags: FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE))
+                            parameterFlags: FxParameterFlags(kFxParameterFlag_DEFAULT))
+        os_log(.default, log: lmLog, "LUTSkin: addParameters complete")
     }
 
     override func populateState(_ state: inout LightingPluginState,
@@ -662,7 +679,7 @@ class ThinFilmPlugIn: LightingBasePlugIn {
         addSlider(p, name: "Film Depth", id: kThinFilmDepth,
                   def: 1.0, min: 0, max: 5, sMin: 0, sMax: 3, delta: 0.05)
         p.addImageReference(withName: "Fringe Map", parameterID: kThinFringeImage,
-                            parameterFlags: FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE))
+                            parameterFlags: FxParameterFlags(kFxParameterFlag_DEFAULT))
     }
 
     override func populateState(_ state: inout LightingPluginState,
@@ -683,7 +700,7 @@ class EnvMapPlugIn: LightingBasePlugIn {
     override func addParameters() throws {
         let p = creationAPI()
         p.addImageReference(withName: "Environment", parameterID: kEnvImage,
-                            parameterFlags: FxParameterFlags(kFxParameterFlag_NOT_ANIMATABLE))
+                            parameterFlags: FxParameterFlags(kFxParameterFlag_DEFAULT))
         addSlider(p, name: "Mix Ratio", id: kEnvRatio,
                   def: 0.5, min: 0, max: 1, sMin: 0, sMax: 1, delta: 0.01)
     }
