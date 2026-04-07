@@ -11,7 +11,8 @@ typedef enum LM_VertexInputIndex {
 
 // Texture indices
 typedef enum LM_TextureIndex {
-    LM_BTI_InputImage = 0,
+    LM_BTI_InputImage = 0,   // always: the source video frame
+    LM_BTI_AuxImage   = 1,   // optional: env map / LUT / fringe map (image well)
 } LM_TextureIndex;
 
 // Fragment buffer indices
@@ -19,21 +20,21 @@ typedef enum LM_FragmentIndex {
     LM_BFI_Uniforms = 0,
 } LM_FragmentIndex;
 
-// Per-vertex data (matches template)
+// Per-vertex data
 typedef struct Vertex2D {
     vector_float2 position;
     vector_float2 textureCoordinate;
 } Vertex2D;
 
-// All shader uniforms in one struct — zero-cost fields that aren't
-// used by the selected shader are simply ignored in the Metal code.
+// All shader uniforms — unused fields in a given shader are simply zero.
 typedef struct LightingUniforms {
     int   shaderIndex;
+    int   hasAuxTexture;    // 1 if an image well texture is bound at slot 1
 
-    // Shared light color
+    // Shared / Blinn / Phong / Hemisphere / EdgeFuzz / EnvMap light color
     float lightR, lightG, lightB;
 
-    // Phong
+    // Phong-specific
     float shininess, specular;
     float ambR, ambG, ambB;
 
@@ -44,13 +45,26 @@ typedef struct LightingUniforms {
 
     // EdgeFuzz
     float edgeSpecularity, edgeFuzziness, edgeFade;
+    float edgeColorR, edgeColorG, edgeColorB;
+    float surfaceColorR, surfaceColorG, surfaceColorB;
+    float ambientColorR, ambientColorG, ambientColorB;
 
     // GlossyWet
     float glossSpecExp, glossSpec;
     float glossMax, glossMin, glossDrop;
+    float specColorR, specColorG, specColorB;
+    float diffColorR, diffColorG, diffColorB;
+    float glossAmbR,  glossAmbG,  glossAmbB;
 
     // LambSkin
     float lambRolloff;
+    float lambAmbR, lambAmbG, lambAmbB;
+    float lambDiffR, lambDiffG, lambDiffB;
+    float lambSubR, lambSubG, lambSubB;
+
+    // LUTSkin
+    float lutDiffR, lutDiffG, lutDiffB;
+    float lutSpecR, lutSpecG, lutSpecB;
 
     // ThinFilm
     float filmDepth;
@@ -60,6 +74,8 @@ typedef struct LightingUniforms {
 
     // Velvet
     float velvetRolloff;
+    float velvetUnderR, velvetUnderG, velvetUnderB;
+
 } LightingUniforms;
 
 #endif /* ShaderTypes_h */
