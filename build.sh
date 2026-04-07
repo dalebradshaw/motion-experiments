@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT="$SCRIPT_DIR/LightingModels/LightingModels.xcodeproj"
 BUILD_DIR="$SCRIPT_DIR/LightingModels/build"
-INSTALL_DIR="$HOME/Library/Application Support/FxPlug"
+INSTALL_DIR="$HOME/Library/Application Support/Plug-ins/ProPlug"
 
 echo "=== LightingModels FxPlug Build ==="
 echo "Project: $PROJECT"
