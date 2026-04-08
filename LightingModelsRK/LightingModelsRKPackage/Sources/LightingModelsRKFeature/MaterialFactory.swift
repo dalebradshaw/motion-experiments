@@ -47,7 +47,7 @@ enum LightingModel: String, CaseIterable, Identifiable {
 
 // MARK: - Per-shader parameter state
 
-struct ShaderParams {
+struct ShaderParams: Equatable {
     // Shared color controls (mapped to custom_parameter and material_constants)
     var color1: SIMD3<Float>    // primary light / warm / sky / diff color
     var color2: SIMD3<Float>    // secondary ambient / cool / ground color

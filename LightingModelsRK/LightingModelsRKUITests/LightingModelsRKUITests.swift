@@ -16,12 +16,10 @@ final class LightingModelsRKUITests: XCTestCase {
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testLaunchesMainWindow() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        XCTAssertTrue(true)
+        XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 5))
     }
 }
